@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1e7a5c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>人工智能训练师三级理论学习助手</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c2430;
+      --muted: #657080;
+      --line: #d8dee8;
+      --paper: #fbfaf7;
+      --surface: #ffffff;
+      --soft: #eef5f1;
+      --accent: #1e7a5c;
+      --accent-2: #b7791f;
+      --danger: #a23b3b;
+      --shadow: 0 12px 26px rgba(27, 36, 48, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+    button, input, select { font: inherit; }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 310px minmax(0, 1fr);
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: #f4f1eb;
+      padding: 18px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .brand {
+      padding: 8px 8px 14px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+    .brand h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .stat.active {
+      border-color: var(--accent);
+      background: var(--soft);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .stat strong { display: block; font-size: 18px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .mode-grid {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 10px 0 12px;
+      margin: -10px 0 14px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    .mode-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      box-shadow: 0 4px 12px rgba(27, 36, 48, .04);
+    }
+    .mode-card.active {
+      border-color: var(--accent);
+      background: var(--soft);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .mode-card strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.15;
+    }
+    .mode-card span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .filters input {
+      min-width: 0;
+      flex: 1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: var(--surface);
+    }
+    .day-list {
+      display: grid;
+      gap: 8px;
+    }
+    .day-button {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .day-button.active {
+      border-color: var(--accent);
+      background: var(--soft);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .day-button.completed {
+      border-color: #80c799;
+      background: #e7f6ec;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .day-button.done .day-title::after {
+      content: " 已完成";
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .day-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .day-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    main {
+      min-width: 0;
+      padding: 24px clamp(16px, 4vw, 48px) 44px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+    .topbar h2 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.15;
+    }
+    .subline {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 9px 12px;
+      cursor: pointer;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn.warn {
+      color: var(--danger);
+    }
+    .knowledge-cards {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .concept {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    .concept h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .concept p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.8;
+    }
+    .concept.overview {
+      border-left-color: var(--accent-2);
+    }
+    .concept.reminder {
+      border-left-color: var(--danger);
+      background: #fffafa;
+    }
+    .concept.inline {
+      margin-bottom: 0;
+    }
+    .concept-meta {
+      display: inline-flex;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin: 18px 0 12px;
+      flex-wrap: wrap;
+    }
+    .toolbar .left, .toolbar .right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .questions {
+      display: grid;
+      gap: 12px;
+    }
+    .question {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 4px 14px rgba(27, 36, 48, .05);
+    }
+    .question.review {
+      border-color: #e2b8b8;
+      background: #fffafa;
+    }
+    .q-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .q-id {
+      font-weight: 800;
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .q-type {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .accuracy-badge {
+      display: inline-flex;
+      margin-top: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f7faf8;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .q-stem {
+      font-size: 16px;
+      line-height: 1.75;
+      margin: 0 0 12px;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+    }
+    .options li {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      line-height: 1.55;
+      background: #fbfcfd;
+    }
+    .test-options {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .choice {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfcfd;
+      text-align: left;
+      cursor: pointer;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .choice.selected {
+      border-color: var(--accent);
+      background: var(--soft);
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+    .test-feedback {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 10px 0;
+      line-height: 1.55;
+      background: #f7f7f2;
+      border: 1px solid var(--line);
+    }
+    .test-feedback.correct {
+      color: var(--accent);
+      border-color: #b7d7c8;
+      background: #f1faf5;
+    }
+    .test-feedback.wrong {
+      color: var(--danger);
+      border-color: #e2b8b8;
+      background: #fffafa;
+    }
+    .answer {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 12px;
+      line-height: 1.75;
+    }
+    .answer.collapsed { display: none; }
+    .answer strong { color: var(--accent-2); }
+    .explanation {
+      margin-top: 8px;
+      color: #344054;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    .q-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .q-actions.test-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .q-actions.test-actions .btn {
+      width: 100%;
+      padding-left: 6px;
+      padding-right: 6px;
+      text-align: center;
+    }
+    .bottom-actions {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      display: flex;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(27, 36, 48, .05);
+    }
+    .hidden { display: none !important; }
+    .bottom-actions.hidden { display: none; }
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--accent);
+      color: #fff;
+      display: inline-grid;
+      place-items: center;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--surface);
+    }
+    .loading {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--surface);
+    }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .day-list {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .day-button {
+        min-width: 220px;
+      }
+      main { padding: 18px 14px 32px; }
+      .topbar { flex-direction: column; }
+      .actions { justify-content: flex-start; }
+      .mode-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        padding: 6px 0 8px;
+      }
+      .mode-card {
+        padding: 7px 3px;
+        text-align: center;
+      }
+      .mode-card strong {
+        font-size: 15px;
+      }
+      .mode-card span {
+        display: block;
+        font-size: 10px;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>人工智能训练师三级理论学习助手</h1>
+        <p>按五大考试模块分类题库，30 天逐日学习，答案和解析默认展示。</p>
+      </div>
+      <div class="filters">
+        <input id="daySearch" type="search" placeholder="搜索日期或模块">
+      </div>
+      <div id="dayList" class="day-list"></div>
+    </aside>
+    <main>
+      <section class="mode-grid" aria-label="学习状态切换">
+        <button class="mode-card" id="pendingStudyEntry" type="button"><strong id="pendingStudyCount">0</strong><span>待学习题</span></button>
+        <button class="mode-card" id="pendingTestEntry" type="button"><strong id="pendingTestCount">0</strong><span>待自测题</span></button>
+        <button class="mode-card" id="masteredEntry" type="button"><strong id="testedQuestions">0</strong><span>已自测题</span></button>
+        <button class="mode-card" id="reviewEntry" type="button"><strong id="reviewCount">0</strong><span>待复习题</span></button>
+      </section>
+      <section class="topbar">
+        <div>
+          <h2 id="dayTitle"></h2>
+          <div id="daySubline" class="subline"></div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="toggleAnswers">全部隐藏解析</button>
+          <button class="btn" id="onlyReview">只看待复习</button>
+          <button class="btn primary" id="startSelfTest">开始自测</button>
+        </div>
+      </section>
+      <section id="knowledgeCards" class="knowledge-cards"></section>
+      <section class="toolbar">
+        <div class="left">
+          <span class="pill" id="questionCount"></span>
+          <span class="pill" id="weightPill"></span>
+          <span class="pill" id="phasePill"></span>
+        </div>
+        <div class="right">
+          <input id="questionSearch" type="search" placeholder="搜索当天题目" class="btn">
+        </div>
+      </section>
+      <section id="questionList" class="questions"></section>
+      <section id="bottomActions" class="bottom-actions">
+        <button class="btn primary" id="bottomStartSelfTest">开始自测并回到第一题</button>
+      </section>
+      <section id="testBottomActions" class="bottom-actions hidden">
+        <button class="icon-btn" id="bottomBackToFirst" aria-label="返回页面顶部" title="返回页面顶部">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5"></path>
+            <path d="M5 12l7-7 7 7"></path>
+          </svg>
+        </button>
+      </section>
+    </main>
+  </div>
+  <script type="module">
+    const appDataRoot = new URL('./app-data/', window.location.href);
+    const data = await fetch(new URL('config.json', appDataRoot)).then(response => {
+      if (!response.ok) throw new Error(`学习计划加载失败：${response.status}`);
+      return response.json();
+    });
+    const plan = data.plan;
+    const questions = {};
+    const loadedQuestionChunks = new Set();
+    const loadingQuestionChunks = new Map();
+
+    async function loadQuestionChunk(chunkName) {
+      if (loadedQuestionChunks.has(chunkName)) return;
+      if (!loadingQuestionChunks.has(chunkName)) {
+        loadingQuestionChunks.set(
+          chunkName,
+          fetch(new URL(`questions/${chunkName}`, appDataRoot))
+            .then(response => {
+              if (!response.ok) throw new Error(`题目加载失败：${response.status}`);
+              return response.json();
+            })
+            .then(chunk => {
+              Object.assign(questions, chunk);
+              loadedQuestionChunks.add(chunkName);
+              loadingQuestionChunks.delete(chunkName);
+            })
+        );
+      }
+      await loadingQuestionChunks.get(chunkName);
+    }
+
+    async function ensureQuestions(questionIds) {
+      const chunks = [...new Set(questionIds.map(id => data.questionManifest[id]).filter(Boolean))];
+      await Promise.all(chunks.map(loadQuestionChunk));
+    }
+    const stateKey = 'ai-trainer-level3-study-state-v1';
+    const state = JSON.parse(localStorage.getItem(stateKey) || '{"currentDay":1,"reviewIds":[],"showAnswers":true,"onlyReview":false,"hiddenAnswerIds":[],"revealedAnswerIds":[],"viewMode":"learn","testAnswers":{},"testResults":{},"lastResults":{}}');
+    const typeName = { judgement: '判断题', single: '单选题', multiple: '多选题' };
+    state.reviewIds ||= [];
+    state.autoReviewIds ||= [];
+    state.manualReviewState ||= {};
+    if (!state.reviewStateMigrated) {
+      state.autoReviewIds = [...new Set([...state.autoReviewIds, ...state.reviewIds])];
+      state.reviewStateMigrated = true;
+    }
+    state.hiddenAnswerIds ||= [];
+    state.revealedAnswerIds ||= [];
+    state.learnedIds ||= [];
+    state.viewMode ||= 'learn';
+    state.testAnswers ||= {};
+    state.testResults ||= {};
+    state.lastResults ||= {};
+    for (const [id, result] of Object.entries(state.testResults)) {
+      if (!state.lastResults[id]) state.lastResults[id] = result;
+    }
+    state.questionStats ||= {};
+    for (const [id, result] of Object.entries(state.testResults)) {
+      if (!state.questionStats[id]) {
+        state.questionStats[id] = { attempts: 1, correct: result?.correct ? 1 : 0, lastAt: null };
+      }
+    }
+    for (const [id, stat] of Object.entries(state.questionStats)) {
+      if (
+        !state.lastResults[id] &&
+        stat?.attempts > 0 &&
+        stat.correct === stat.attempts &&
+        !state.autoReviewIds.includes(id) &&
+        state.manualReviewState[id] !== true
+      ) {
+        state.lastResults[id] = { selected: [], correct: true, noAnswer: false, recovered: true };
+      }
+    }
+    if (typeof state.showAnswers !== 'boolean') state.showAnswers = true;
+    if (typeof state.onlyReview !== 'boolean') state.onlyReview = false;
+
+    function save() {
+      localStorage.setItem(stateKey, JSON.stringify(state));
+      updateStats();
+    }
+
+    function currentDay() {
+      return plan.days.find(day => day.day === state.currentDay) || plan.days[0];
+    }
+
+    function masteredIds() {
+      return Object.entries(state.lastResults)
+        .filter(([id, result]) => result && result.correct && !isReview(id))
+        .map(([id]) => id);
+    }
+
+    function isLearned(id) {
+      return state.learnedIds.includes(id);
+    }
+
+    function markLearned(id) {
+      if (!state.learnedIds.includes(id)) state.learnedIds.push(id);
+    }
+
+    function pendingStudyIds(day = currentDay()) {
+      return day.question_ids.filter(id => !isLearned(id));
+    }
+
+    function pendingTestIds(day = currentDay()) {
+      return day.question_ids.filter(id => !hasAttempted(id));
+    }
+
+    function hasAttempted(id) {
+      return (state.questionStats[id]?.attempts || 0) > 0;
+    }
+
+    function currentView() {
+      if (state.viewMode === 'review') {
+        const ids = reviewIds();
+        return {
+          centerType: 'review',
+          day: 0,
+          phase: '今日复习提醒',
+          category: '待复习中心',
+          topic: '待复习题',
+          concept: ids.length ? `建议先复习这 ${ids.length} 道待复习题，优先处理手动标记、最近答错或正确率偏低的题。` : '暂时没有待复习题，今天可以直接学习新内容。',
+          question_ids: ids,
+          question_count: ids.length,
+        };
+      }
+      if (state.viewMode === 'mastered') {
+        const ids = masteredIds();
+        return {
+          centerType: 'mastered',
+          day: 0,
+          phase: '当前掌握',
+          category: '已自测题',
+          topic: '已自测题',
+          concept: ids.length ? `这里收集最后一次答对、且当前不在待复习中的 ${ids.length} 道题。` : '还没有当前掌握的题，完成自测并答对后会出现在这里。',
+          question_ids: ids,
+          question_count: ids.length,
+        };
+      }
+      return currentDay();
+    }
+
+    function updateStats() {
+      const day = currentDay();
+      document.getElementById('pendingStudyCount').textContent = pendingStudyIds(day).length;
+      document.getElementById('pendingTestCount').textContent = pendingTestIds(day).length;
+      document.getElementById('testedQuestions').textContent = masteredIds().length;
+      document.getElementById('reviewCount').textContent = reviewIds().length;
+      document.getElementById('pendingStudyEntry').classList.toggle('active', state.viewMode === 'learn');
+      document.getElementById('pendingTestEntry').classList.toggle('active', state.viewMode === 'test');
+      document.getElementById('masteredEntry').classList.toggle('active', state.viewMode === 'mastered');
+      document.getElementById('reviewEntry').classList.toggle('active', state.viewMode === 'review');
+    }
+
+    function isReview(id) {
+      if (Object.prototype.hasOwnProperty.call(state.manualReviewState, id)) {
+        return state.manualReviewState[id] === true;
+      }
+      return state.autoReviewIds.includes(id);
+    }
+
+    function reviewIds() {
+      const ids = new Set([
+        ...state.autoReviewIds,
+        ...Object.keys(state.manualReviewState).filter(id => state.manualReviewState[id] === true),
+      ]);
+      return [...ids].filter(id => data.questionManifest[id] && isReview(id));
+    }
+
+    function setAutoReview(id, value) {
+      state.autoReviewIds = value
+        ? [...new Set([...state.autoReviewIds, id])]
+        : state.autoReviewIds.filter(item => item !== id);
+    }
+
+    function toggleManualReview(id) {
+      state.manualReviewState[id] = !isReview(id);
+    }
+
+    function isAnswerVisible(id) {
+      return state.showAnswers ? !state.hiddenAnswerIds.includes(id) : state.revealedAnswerIds.includes(id);
+    }
+
+    function toggleAnswer(id) {
+      if (isAnswerVisible(id)) {
+        state.revealedAnswerIds = state.revealedAnswerIds.filter(item => item !== id);
+        if (!state.hiddenAnswerIds.includes(id)) state.hiddenAnswerIds.push(id);
+      } else {
+        state.hiddenAnswerIds = state.hiddenAnswerIds.filter(item => item !== id);
+        if (!state.revealedAnswerIds.includes(id)) state.revealedAnswerIds.push(id);
+        markLearned(id);
+      }
+    }
+
+    function answerLetters(question) {
+      const answer = String(question.answer || '').replace(/[^A-E√×]/g, '');
+      return [...answer];
+    }
+
+    function sameAnswer(left, right) {
+      return [...new Set(left)].sort().join('') === [...new Set(right)].sort().join('');
+    }
+
+    function choiceItems(question) {
+      if (question.type === 'judgement') {
+        return [
+          { value: '√', label: '√ 正确' },
+          { value: '×', label: '× 错误' },
+        ];
+      }
+      const text = (question.options || []).join(' ');
+      const marker = /(?:^|\s)[（(]?([A-E])[\.．、)）]\s*/g;
+      const matches = [...text.matchAll(marker)];
+      if (!matches.length) {
+        return (question.options || []).map((option, index) => {
+          const value = String.fromCharCode(65 + index);
+          return { value, label: `${value}. ${option}` };
+        });
+      }
+      return matches.map((match, index) => {
+        const start = match.index + match[0].length;
+        const end = index + 1 < matches.length ? matches[index + 1].index : text.length;
+        const value = match[1];
+        const body = text.slice(start, end).trim();
+        return { value, label: `${value}. ${body}` };
+      });
+    }
+
+    function selectedAnswer(id) {
+      return state.testAnswers[id] || [];
+    }
+
+    function recordAttempt(id, correct) {
+      const stat = state.questionStats[id] || { attempts: 0, correct: 0, lastAt: null };
+      stat.attempts += 1;
+      if (correct) stat.correct += 1;
+      stat.lastAt = new Date().toISOString();
+      state.questionStats[id] = stat;
+    }
+
+    function accuracyText(id) {
+      const stat = state.questionStats[id] || { attempts: 0, correct: 0 };
+      if (!stat.attempts) return '正确率 暂无 · 0/0';
+      return `正确率 ${Math.round((stat.correct / stat.attempts) * 100)}% · ${stat.correct}/${stat.attempts}`;
+    }
+
+    function scrollToFirstQuestion() {
+      requestAnimationFrame(() => {
+        const first = document.querySelector('.question');
+        if (first) first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    function scrollToDayHeader() {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    function resetCurrentDayTest() {
+      for (const id of currentDay().question_ids) {
+        delete state.testAnswers[id];
+        delete state.testResults[id];
+      }
+    }
+
+    async function enterSelfTest() {
+      resetCurrentDayTest();
+      state.viewMode = 'test';
+      state.showAnswers = false;
+      state.revealedAnswerIds = [];
+      save();
+      await renderAll();
+      scrollToFirstQuestion();
+    }
+
+    function renderDays() {
+      const query = document.getElementById('daySearch').value.trim();
+      const list = document.getElementById('dayList');
+      list.innerHTML = '';
+      plan.days
+        .filter(day => !query || `${day.day} ${day.category} ${day.topic} ${day.phase}`.includes(query))
+        .forEach(day => {
+          const tested = day.question_ids.length > 0 && day.question_ids.every(id => hasAttempted(id));
+          const button = document.createElement('button');
+          button.className = 'day-button' + (day.day === state.currentDay && !['review', 'mastered'].includes(state.viewMode) ? ' active' : '') + (tested ? ' completed done' : '');
+          button.innerHTML = `<div class="day-title"><span>Day ${String(day.day).padStart(2, '0')}</span><span>${day.question_count} 题</span></div>
+            <div class="day-meta">${day.category} · ${day.topic}<br>${day.phase}</div>`;
+          button.addEventListener('click', async () => {
+            state.currentDay = day.day;
+            state.viewMode = 'learn';
+            save();
+            await renderAll();
+          });
+          list.appendChild(button);
+        });
+    }
+
+    function renderHeader(day) {
+      const inCenter = Boolean(day.centerType);
+      document.getElementById('dayTitle').textContent = inCenter ? day.topic : `Day ${String(day.day).padStart(2, '0')} · ${day.topic}`;
+      document.getElementById('daySubline').textContent = inCenter ? `${day.category} / ${day.phase} / ${day.question_count} 题` : `${day.category} / ${day.phase} / ${day.question_count} 题 / ${state.viewMode === 'test' ? '自测模式' : '学习模式'}`;
+      document.getElementById('questionCount').textContent = inCenter ? `${day.question_count} 题` : `今日 ${day.question_count} 题`;
+      document.getElementById('weightPill').textContent = data.categoryWeights[day.category] ? `考试权重 ${data.categoryWeights[day.category]} 分` : day.category;
+      document.getElementById('phasePill').textContent = day.phase;
+      document.getElementById('toggleAnswers').textContent = state.showAnswers ? '全部隐藏解析' : '全部显示解析';
+      document.getElementById('onlyReview').textContent = state.onlyReview ? '显示全部' : '只看待复习';
+      document.getElementById('startSelfTest').textContent = state.viewMode === 'test' || inCenter ? '返回学习' : '开始自测';
+      document.getElementById('toggleAnswers').classList.toggle('hidden', state.viewMode === 'review');
+      document.getElementById('onlyReview').classList.toggle('hidden', inCenter);
+      document.getElementById('bottomActions').classList.toggle('hidden', state.viewMode === 'test' || inCenter);
+      document.getElementById('testBottomActions').classList.toggle('hidden', state.viewMode === 'learn');
+      renderKnowledgeCards(day);
+    }
+
+    function guideFor(point) {
+      return data.knowledgeGuides[point.name] || `这组题集中考“${point.name}”。先看题目反复出现的关键词，再比较判断题、单选题和多选题的问法差异。`;
+    }
+
+    function guideForName(name) {
+      return data.knowledgeGuides[name] || `这组题集中考“${name}”。先看题目反复出现的关键词，再比较判断题、单选题和多选题的问法差异。`;
+    }
+
+    function renderKnowledgeCards(day) {
+      const cards = document.getElementById('knowledgeCards');
+      cards.classList.toggle('hidden', state.viewMode === 'test' || state.viewMode === 'mastered');
+      if (state.viewMode === 'test' || state.viewMode === 'mastered') {
+        cards.innerHTML = '';
+        return;
+      }
+      if (state.viewMode === 'review') {
+        cards.innerHTML = `
+          <article class="concept reminder">
+            <span class="concept-meta">每日复习入口</span>
+            <h3>今日建议先复习 ${day.question_count} 题</h3>
+            <p>${escapeHtml(day.concept)}</p>
+          </article>
+        `;
+        return;
+      }
+      const overviewTitle = day.category === '模拟卷' ? day.topic : `${day.category}：${day.topic}`;
+      cards.innerHTML = `
+        <article class="concept overview">
+          <span class="concept-meta">今日总览</span>
+          <h3>${escapeHtml(overviewTitle)}</h3>
+          <p>${escapeHtml(day.concept || '今天先看知识点讲解，再做对应题目，最后进入自测。')}</p>
+        </article>
+      `;
+    }
+
+    function sourceText(question) {
+      return question.sources.map(source => `${source.source.replace('.docx', '').replace('.pdf', '')} #${source.source_question_number}`).join(' / ');
+    }
+
+    function renderQuestions(day) {
+      const query = document.getElementById('questionSearch').value.trim();
+      const list = document.getElementById('questionList');
+      const ids = day.question_ids;
+      const inTest = state.viewMode === 'test' || state.viewMode === 'review';
+      const showAccuracy = state.viewMode === 'review' || state.viewMode === 'mastered';
+      const showInlineConcepts = state.viewMode === 'learn';
+      let rows = ids.map(id => questions[id]).filter(Boolean);
+      if (state.onlyReview && !day.centerType) rows = rows.filter(q => isReview(q.id));
+      if (query) {
+        rows = rows.filter(q => `${q.stem} ${(q.options || []).join(' ')} ${q.answer || ''} ${q.explanation || ''}`.includes(query));
+      }
+      list.innerHTML = '';
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty">这里暂时没有符合条件的题目。</div>';
+        return;
+      }
+      const visibleCounts = rows.reduce((acc, question) => {
+        const point = question.knowledge_point || '综合题目';
+        acc[point] = (acc[point] || 0) + 1;
+        return acc;
+      }, {});
+      let lastKnowledgePoint = '';
+      rows.forEach((question, index) => {
+        if (showInlineConcepts && question.knowledge_point && question.knowledge_point !== lastKnowledgePoint) {
+          lastKnowledgePoint = question.knowledge_point;
+          const separator = document.createElement('section');
+          separator.className = 'concept inline';
+          separator.innerHTML = `<span class="concept-meta">${escapeHtml(visibleCounts[question.knowledge_point] || 0)} 题</span><h3>${escapeHtml(question.knowledge_point)}</h3><p>${escapeHtml(guideForName(question.knowledge_point))}</p>`;
+          list.appendChild(separator);
+        }
+        const article = document.createElement('article');
+        article.className = 'question' + (isReview(question.id) ? ' review' : '');
+        const choices = choiceItems(question);
+        const selected = selectedAnswer(question.id);
+        const result = state.testResults[question.id];
+        const accuracyMarkup = showAccuracy ? `<div class="accuracy-badge">${escapeHtml(accuracyText(question.id))}</div>` : '';
+        const options = choices.map(choice => `<li>${escapeHtml(choice.label)}</li>`).join('');
+        const testOptions = choices.map(choice => `
+          <button class="choice ${selected.includes(choice.value) ? 'selected' : ''}" data-action="select-option" data-id="${question.id}" data-value="${choice.value}">
+            ${escapeHtml(choice.label)}
+          </button>
+        `).join('');
+        const resultMarkup = result ? `
+          <div class="test-feedback ${result.correct ? 'correct' : 'wrong'}">
+            ${result.noAnswer ? '这题暂时没有答案，先放进待复习。' : (result.correct ? '答对了' : '这题没选对')}你的答案：${escapeHtml(result.selected.join('') || '未选择')}；正确答案：${escapeHtml(question.answer || '暂无答案')}。
+          </div>
+        ` : '';
+        const answerVisible = result || (!inTest && isAnswerVisible(question.id));
+        const learningAction = (() => {
+          if (answerVisible && !isLearned(question.id)) {
+            return `<button class="btn" data-action="mark-learned" data-id="${question.id}">标为已学习</button>`;
+          }
+          return `<button class="btn" data-action="toggle-answer" data-id="${question.id}">${answerVisible ? '隐藏解析' : '查看解析'}</button>`;
+        })();
+        article.innerHTML = `
+          <div class="q-head">
+            <div><div class="q-id">${index + 1} / ${question.id}</div><div class="q-type">${typeName[question.type] || question.type} · ${question.category}</div>${accuracyMarkup}</div>
+            <div class="q-type">${escapeHtml(sourceText(question))}</div>
+          </div>
+          <p class="q-stem">${escapeHtml(question.stem)}</p>
+          ${inTest ? `<div class="test-options">${testOptions}</div>` : (options ? `<ul class="options">${options}</ul>` : '')}
+          ${inTest ? resultMarkup : ''}
+          <div class="answer ${answerVisible ? '' : 'collapsed'}">
+            <div><strong>答案：</strong>${escapeHtml(question.answer || '暂无答案')}</div>
+            <div class="explanation"><strong>解析：</strong>${escapeHtml(question.explanation || '这道题来自补充题源，第一版暂未抽到解析；后续会优先补齐。')}</div>
+          </div>
+          <div class="q-actions ${inTest ? 'test-actions' : ''}">
+            ${inTest ? `<button class="btn primary" data-action="submit-answer" data-id="${question.id}">提交本题</button>
+            <button class="btn" data-action="reset-answer" data-id="${question.id}">重新作答</button>` : learningAction}
+            <button class="btn warn" data-action="review" data-id="${question.id}">${isReview(question.id) ? '取消待复习' : '待复习'}</button>
+          </div>
+        `;
+        list.appendChild(article);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char]));
+    }
+
+    let renderVersion = 0;
+    async function renderAll() {
+      const version = ++renderVersion;
+      const day = currentView();
+      document.getElementById('questionList').innerHTML = '<div class="loading">正在加载本组题目...</div>';
+      await ensureQuestions(day.question_ids);
+      if (version !== renderVersion) return;
+      renderDays();
+      renderHeader(day);
+      renderQuestions(day);
+      updateStats();
+    }
+
+    document.getElementById('daySearch').addEventListener('input', renderDays);
+    document.getElementById('questionSearch').addEventListener('input', () => renderQuestions(currentView()));
+    document.getElementById('pendingStudyEntry').addEventListener('click', async () => {
+      state.viewMode = 'learn';
+      state.onlyReview = false;
+      save();
+      await renderAll();
+      scrollToDayHeader();
+    });
+    document.getElementById('pendingTestEntry').addEventListener('click', async () => {
+      await enterSelfTest();
+    });
+    document.getElementById('masteredEntry').addEventListener('click', async () => {
+      state.viewMode = 'mastered';
+      state.onlyReview = false;
+      save();
+      await renderAll();
+      scrollToDayHeader();
+    });
+    document.getElementById('reviewEntry').addEventListener('click', async () => {
+      state.viewMode = 'review';
+      state.onlyReview = false;
+      save();
+      await renderAll();
+      scrollToDayHeader();
+    });
+    document.getElementById('toggleAnswers').addEventListener('click', async () => {
+      state.showAnswers = !state.showAnswers;
+      state.hiddenAnswerIds = [];
+      state.revealedAnswerIds = [];
+      save();
+      await renderAll();
+    });
+    document.getElementById('onlyReview').addEventListener('click', async () => {
+      state.onlyReview = !state.onlyReview;
+      save();
+      await renderAll();
+    });
+    document.getElementById('startSelfTest').addEventListener('click', async () => {
+      if (state.viewMode === 'test' || state.viewMode === 'review' || state.viewMode === 'mastered') {
+        state.viewMode = 'learn';
+        save();
+        await renderAll();
+      } else {
+        await enterSelfTest();
+      }
+    });
+    document.getElementById('bottomStartSelfTest').addEventListener('click', async () => {
+      await enterSelfTest();
+    });
+    document.getElementById('bottomBackToFirst').addEventListener('click', () => {
+      scrollToDayHeader();
+    });
+    document.getElementById('questionList').addEventListener('click', async event => {
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const id = button.dataset.id;
+      const question = questions[id];
+      if (button.dataset.action === 'select-option') {
+        const value = button.dataset.value;
+        const selected = selectedAnswer(id);
+        if (question.type === 'multiple') {
+          state.testAnswers[id] = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value];
+        } else {
+          state.testAnswers[id] = [value];
+        }
+        delete state.testResults[id];
+      } else if (button.dataset.action === 'submit-answer') {
+        const selected = selectedAnswer(id);
+        const correctAnswer = answerLetters(question);
+        const noAnswer = correctAnswer.length === 0;
+        const correct = !noAnswer && sameAnswer(selected, correctAnswer);
+        state.testResults[id] = { selected, correct, noAnswer };
+        state.lastResults[id] = { selected, correct, noAnswer };
+        recordAttempt(id, correct);
+        setAutoReview(id, !correct);
+      } else if (button.dataset.action === 'reset-answer') {
+        state.testAnswers[id] = [];
+        delete state.testResults[id];
+      } else if (button.dataset.action === 'toggle-answer') {
+        toggleAnswer(id);
+      } else if (button.dataset.action === 'mark-learned') {
+        markLearned(id);
+      } else if (button.dataset.action === 'review') {
+        toggleManualReview(id);
+      } else {
+        markLearned(id);
+      }
+      save();
+      await renderAll();
+    });
+    await renderAll();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(error => console.warn('离线缓存注册失败', error));
+    }
+  </script>
+</body>
+</html>
