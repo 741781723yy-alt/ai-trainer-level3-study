@@ -609,6 +609,7 @@
     state.revealedAnswerIds ||= [];
     state.learnedIds ||= [];
     state.viewMode ||= 'learn';
+    if (state.viewMode === 'learn') state.showAnswers = true;
     state.testAnswers ||= {};
     state.testResults ||= {};
     state.lastResults ||= {};
@@ -849,6 +850,7 @@
           button.addEventListener('click', async () => {
             state.currentDay = day.day;
             state.viewMode = 'learn';
+            state.showAnswers = true;
             save();
             await renderAll();
           });
@@ -1010,6 +1012,7 @@
     document.getElementById('questionSearch').addEventListener('input', () => renderQuestions(currentView()));
     document.getElementById('pendingStudyEntry').addEventListener('click', async () => {
       state.viewMode = 'learn';
+      state.showAnswers = true;
       state.onlyReview = false;
       save();
       await renderAll();
@@ -1047,6 +1050,7 @@
     document.getElementById('startSelfTest').addEventListener('click', async () => {
       if (state.viewMode === 'test' || state.viewMode === 'review' || state.viewMode === 'mastered') {
         state.viewMode = 'learn';
+        state.showAnswers = true;
         save();
         await renderAll();
       } else {

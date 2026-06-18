@@ -1,0 +1,17 @@
+/*
+  X-Content-Type-Options: nosniff
+
+# Service Worker 永不强缓存，确保用户总能拿到最新版本
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 清单文件不缓存
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 配置和题组 JSON 内容会更新，每次都要校验
+/app-data/config.json
+  Cache-Control: public, max-age=0, must-revalidate
+
+/app-data/questions/*.json
+  Cache-Control: public, max-age=0, must-revalidate
