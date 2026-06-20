@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ai-trainer-study-v2';
+const CACHE_NAME = 'ai-trainer-study-v3';
 const PRECACHE = ["./", "./index.html", "./app-data/config.json", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener('install', event => {
@@ -19,14 +19,18 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  // 题库数据：network-first —— 联网时总用最新版（改题/加题能立即生效），断网才回退缓存
   if (url.pathname.includes('/app-data/questions/')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async cache => {
-        const cached = await cache.match(event.request);
-        if (cached) return cached;
-        const response = await fetch(event.request);
-        if (response.ok) cache.put(event.request, response.clone());
-        return response;
+        try {
+          const response = await fetch(event.request);
+          if (response.ok) cache.put(event.request, response.clone());
+          return response;
+        } catch (err) {
+          const cached = await cache.match(event.request);
+          return cached || Response.error();
+        }
       })
     );
     return;
